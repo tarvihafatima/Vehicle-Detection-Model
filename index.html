@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>Vehicle Detection Model</title>
   <!-- Load TensorFlow.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-chable Machine Image Library -->
+  https://cdn.jsdelivr.net/npm/@tensorflow/tfjs</script>
+  <!-- Load Teachable Machine Image Library -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></e>
     body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
     #webcam-container, #label-container { margin-top: 20px; }
@@ -46,6 +46,7 @@ chable Machine Image Library -->
     }
 
     async function loop() {
+      webcam.update();
       await predict();
       window.requestAnimationFrame(loop);
     }
@@ -57,7 +58,6 @@ chable Machine Image Library -->
           prediction[i].className + ": " + prediction[i].probability.toFixed(2);
         labelContainer.childNodes[i].innerHTML = classPrediction;
       }
-    }
-  </script>
+   script>
 </body>
 </html>
