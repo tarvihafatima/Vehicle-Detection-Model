@@ -2,11 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Teachable Machine Model</title>
+  <title>Vehicle Detection Model</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+    #webcam-container, #label-container { margin-top: 20px; }
+    button { padding: 10px 20px; font-size: 16px; margin: 10px; }
+  </style>
 </head>
 <body>
-  <h1>Try My Vehicle Detection Model!</h1>
-  <p>This model was trained using Teachable Machine. Click the link below to interact with it:</p>
-  <a href="https://teachablemachine.withgoogle.com/models/UsyN384dQ/" target="_blank">
+  <h1>Vehicle Detection Model</h1>
+  <p>Click "Start" to activate your webcam and test the model.</p>
+  <button onclick="init()">Start</button>
+  <div id="webcam-container"></div>
+  <div id="label-container"></div>
+
+  <script>
+    const URL = "https://teachablemachine.withgoogle.com/models/UsyN384dQ/";
+    let model, webcam, labelContainer, maxPredictions;
+
+    async function init() {
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
+
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+
+      const flip = true;
+      webcam = new tmImage.Webcam(200, 200, flip);
+      await webcam.setup();
+      await webcam.play();
+      window.requestAnimationFrame(loop);
+
+      document.getElementById("webcam-container").appendChild(webcam.canvas);
+      labelContainer = document.getElementById("label-container");
+      for (let i = 0; i < maxPredictions; i++) {
+        labelContainer.appendChild(document.createElement("div"));
+      }
+    }
+
+    async function loop() {
+      webcam.update();
+      await predict();
+      window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+      const prediction = await model.predict(webcam.canvas);
+      for (let i = 0; i < maxPredictions; i++) {
+        const classPrediction =
+          prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+        labelContainer.childNodes[i].innerHTML = classPrediction;
+      }
+    }
+  </script>
 </body>
 </html>
+``
