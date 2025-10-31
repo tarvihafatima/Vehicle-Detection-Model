@@ -1,64 +1,87 @@
+
+Tarviha Fatima <tararqum@gmail.com>
+2:24 AM (0 minutes ago)
+to me
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Vehicle Detection Model</title>
+  <title>Vehicle Detection (Image Upload)</title>
+
   <!-- Load TensorFlow.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <!-- Load Teachable Machine Image library -->
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.3/dist/teachablemachine-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; text-align:center; margin:20px; }
-    #webcam-container, #label-container { margin-top:20px; }
-    button { padding:10px 20px; font-size:16px; margin:10px; }
+    body { font-family: Arial, sans-serif; text-align: center; margin: 24px; }
+    .uploader { margin: 16px 0; }
+    #preview { max-width: 320px; max-height: 320px; display: none; margin: 12px auto; }
+    #label-container div { margin: 6px 0; }
   </style>
 </head>
 <body>
   <h1>Vehicle Detection Model</h1>
-  <p>Click "Start" to activate your webcam and test the model.</p>
-  <button onclick="init()">Start</button>
-  <div id="webcam-container"></div>
+  <p>Select an image to run the model on it.</p>
+
+  <div class="uploader">
+    <input id="file-input" type="file" accept="image/*" />
+  </div>
+
+  <img id="preview" alt="Selected image preview" />
+
   <div id="label-container"></div>
 
   <script>
-    const URL = "https://teachablemachine.withgoogle.com/models/UsyN384dQ/";
-    let model, webcam, labelContainer, maxPredictions;
+    // 1) Put your Teachable Machine model base URL here (trailing slash required)
+    const MODEL_BASE = "https://teachablemachine.withgoogle.com/models/UsyN384d0/";
 
-    async function init() {
-      const modelURL = URL + "model.json";
-      const metadataURL = URL + "metadata.json";
+    let model, maxPredictions, labelContainer;
 
-      // Load the model
+    // Load the model once, on page load
+    window.addEventListener("load", async () => {
+      const modelURL = MODEL_BASE + "model.json";
+      const metadataURL = MODEL_BASE + "metadata.json";
+
       model = await tmImage.load(modelURL, metadataURL);
       maxPredictions = model.getTotalClasses();
 
-      // Setup webcam
-      const flip = true;
-      webcam = new tmImage.Webcam(200, 200, flip);
-      await webcam.setup();
-      await webcam.play();
-      window.requestAnimationFrame(loop);
-
-      document.getElementById("webcam-container").appendChild(webcam.canvas);
       labelContainer = document.getElementById("label-container");
+      // Pre-create rows for each class
       for (let i = 0; i < maxPredictions; i++) {
         labelContainer.appendChild(document.createElement("div"));
       }
-    }
+    });
 
-    async function loop() {
-      webcam.update();
-      await predict();
-      window.requestAnimationFrame(loop);
-    }
+    // Handle file selection
+    document.getElementById("file-input").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file || !model) return;
 
-    async function predict() {
-      const prediction = await model.predict(webcam.canvas);
-      for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-          prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-      }
+      const img = document.getElementById("preview");
+      // Create a temporary object URL for the local file
+      const objectURL = window.URL.createObjectURL(file);
+      img.src = objectURL;
+      img.style.display = "block";
+
+      img.onload = async () => {
+        // 2) Run prediction on the loaded image element
+        const predictions = await model.predict(img);
+
+        // Optional: sort by highest probability first
+        predictions.sort((a, b) => b.probability - a.probability);
+
+        for (let i = 0; i < maxPredictions; i++) {
+          const p = predictions[i];
+          const line = `${p.className}: ${p.probability.toFixed(2)}`;
+          labelContainer.childNodes[i].textContent = line;
+        }
+
+        // Free the object URL once we're done
+        window.URL.revokeObjectURL(objectURL);
+      };
+    });
   </script>
 </body>
 </html>
