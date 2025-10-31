@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Vehicle Detection Model</title>
+  <!-- Load TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+chable Machine Image Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></e>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
     #webcam-container, #label-container { margin-top: 20px; }
     button { padding: 10px 20px; font-size: 16px; margin: 10px; }
   </style>
@@ -24,9 +27,11 @@ https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script body { font-famil
       const modelURL = URL + "model.json";
       const metadataURL = URL + "metadata.json";
 
+      // Load the model
       model = await tmImage.load(modelURL, metadataURL);
       maxPredictions = model.getTotalClasses();
 
+      // Setup webcam
       const flip = true;
       webcam = new tmImage.Webcam(200, 200, flip);
       await webcam.setup();
@@ -41,7 +46,6 @@ https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script body { font-famil
     }
 
     async function loop() {
-      webcam.update();
       await predict();
       window.requestAnimationFrame(loop);
     }
